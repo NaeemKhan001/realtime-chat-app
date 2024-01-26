@@ -1,42 +1,66 @@
 import User from "../models/user.model.js";
-import crypto from "bcrypt";
-const saltRounds = 6;
+import bcrypt from "bcrypt";
+
 const userController = {
+	// User Registration API
 	register: async (req, res) => {
 		const { firstName, lastName, email, password } = req.body;
+		const userEmail = email.toLowerCase();
+
+		try {
+			const existingUser = await User.findOne({ email: userEmail });
+			if (existingUser) {
+				return res
+					.status(400)
+					.json({ error: "User already exists with this email" });
+			}
+			const hashedPassword = await bcrypt.hash(password, 10);
+			const newUser = new User({
+				firstName,
+				lastName,
+				email: userEmail,
+				password: hashedPassword,
+			});
+			await newUser.save();
+
+			res.status(200).json({ message: "User registered successfully" });
+		} catch (error) {
+			console.error("Error during registration:", error);
+			res.status(500).json({ error: "Internal Server Error" });
+		}
+	},
+	login: async (req, res) => {
+		const { email, password } = req.body;
 		let userEmail = email.toLowerCase();
 		try {
-			if ((!firstName, !lastName, !email, !password)) {
+			if (!email || !password) {
 				return res.status(400).json({ error: "One or more fields missing." });
 			} else {
-				const existingUserByEmail = await User.findOne({ email: userEmail });
-				if (existingUserByEmail) {
+				let existingUserByEmail = await User.findOne({ email: userEmail });
+				if (!existingUserByEmail) {
 					return res
 						.status(400)
-						.json({ error: "User Already exists with this email" });
-				} else if (password.length < 6) {
-					return res
-						.status(400)
-						.json({ error: "Password must be at least 6 characters long." });
+						.json({ error: "Email or Password is Incorrect." });
 				} else {
-					let encryptedPassword = crypto.hashSync(password, saltRounds);
-					const data = {
-						firstName: firstName,
-						lastName: lastName,
-						email: userEmail,
-						password: encryptedPassword,
-					};
-					const newUser = new User(data);
-					const user = await newUser.save();
-					const userObj = {
-						...user?._doc,
-					};
-					delete userObj?.password;
-					return res.status(200).json({ userObj });
+					const matchPassword = bcrypt.compare(
+						password,
+						existingUserByEmail.password
+					);
+					if (!matchPassword) {
+						return res
+							.status(400)
+							.json({ error: "Email or Password is Incorrect." });
+					} else {
+						const userObj = {
+							...existingUserByEmail?._doc,
+						};
+						delete userObj?.password;
+						return res.status(200).json({ userObj });
+					}
 				}
 			}
 		} catch (error) {
-			res.status(500).json({ error: error.message });
+			return res.status(500).json({ error: error.message });
 		}
 	},
 };
