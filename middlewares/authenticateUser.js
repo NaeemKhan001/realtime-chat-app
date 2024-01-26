@@ -43,7 +43,6 @@ function authenticateUser() {
 	return async (req, res, next) => {
 		passport.authenticate("local", (err, user, info) => {
 			console.log("error >>", err);
-			console.log("user >>", user);
 			console.log("info >>", info);
 			if (err) {
 				return next(err);

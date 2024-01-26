@@ -49,7 +49,6 @@ const webSockets = (server) => {
 
 	function findSocketByUserId(io, userId) {
 		const sockets = io.sockets.sockets;
-		console.log("findSocketByUserId sockets >>", userId);
 		const result = [];
 		sockets?.forEach((socket) => {
 			if (socket.handshake.query.userId == userId) {

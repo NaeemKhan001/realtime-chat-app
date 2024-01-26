@@ -24,7 +24,6 @@ A Realtime Chat Application built on Node.js, Express, MongoDB, Passport.js, Soc
 
 1. Clone the repository:
 
-   ```bash
    https://github.com/NaeemKhan001/realtime-chat-app.git
    cd realtime-chat-app
 
