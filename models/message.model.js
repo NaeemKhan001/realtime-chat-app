@@ -5,6 +5,8 @@ let messageSchema = new mongoose.Schema(
 	{
 		senderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
 		recepientId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+		isDeletedForSender: { type: Boolean, default: false },
+		isDeletedForRecipient: { type: Boolean, default: false },
 		message: { type: String, default: "" },
 		timestamp: { type: Date, default: Date.now },
 	},
