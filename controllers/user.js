@@ -39,6 +39,41 @@ const userController = {
 			res.status(500).json({ error: error.message });
 		}
 	},
+
+	login: async (req, res) => {
+		const { email, password } = req.body;
+		let userEmail = email.toLowerCase();
+		try {
+			if (!email || !password) {
+				return res.status(400).json({ error: "One or more fields missing." });
+			} else {
+				let existingUserByEmail = await User.findOne({ email: userEmail });
+				if (!existingUserByEmail) {
+					return res
+						.status(400)
+						.json({ error: "Email or Password is Incorrect." });
+				} else {
+					const matchPassword = crypto.compareSync(
+						password,
+						existingUserByEmail.password
+					);
+					if (!matchPassword) {
+						return res
+							.status(400)
+							.json({ error: "Email or Password is Incorrect." });
+					} else {
+						const userObj = {
+							...existingUserByEmail?._doc,
+						};
+						delete userObj?.password;
+						return res.status(200).json({ userObj });
+					}
+				}
+			}
+		} catch (error) {
+			return res.status(500).json({ error: error.message });
+		}
+	},
 };
 
 export default userController;
